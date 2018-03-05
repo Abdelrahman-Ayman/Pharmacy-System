@@ -17,7 +17,10 @@ public class Prescription {
     }
 
     public void setCode(int code) {
-        this.code = code;
+        if (String.valueOf(code).length()==8)
+        {this.code = code;}
+        else 
+            system.out.print("Error");   
     }
 
     public ArrayList<PrescriptionMedication> getMedications() {
