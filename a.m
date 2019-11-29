@@ -13,7 +13,7 @@ for i = 1:length(imagesInfo)
     end
     TrainingLabels{i} = str2num(imagesInfo(i).name(1))+1;
     TrainingFFTs{i} = fft2(double(TrainingImages{i}));
-    TrainingSignatureVector{i} = abs(TrainingFFTs{i});
+    TrainingSignatureVector{i} = abs(TrainingFFTs{i}(:));
     TrainingSignatureVector{i} = sort(TrainingSignatureVector{i},'descend');
     %get 5 highest spectrum magnitudes.
     TrainingSignatureVector{i} = double(TrainingSignatureVector{i}(1:5));
@@ -26,7 +26,7 @@ RedChannel = medfilt2(ImageTest(:,:,1), [3 3]);
 GreenChannel = medfilt2(ImageTest(:,:,2), [3 3]);
 BlueChannel = medfilt2(ImageTest(:,:,3), [3 3]);
 
-%Split green channel into 8 Bit Planes since red channel is blury and there is no blue channel.
+%Split green channel into 8 Bit Planes
 cd = double(GreenChannel);
 BitPlane1 = mod(cd, 2);
 BitPlane2 = mod(floor(cd/2), 2);
@@ -38,7 +38,6 @@ BitPlane7 = mod(floor(cd/64), 2);
 BitPlane8 = mod(floor(cd/128), 2);
 %Generate new image by combining bit planes 7 and 8 since the other planes contains undesirable information.
 EnhancedImage = uint8(BitPlane8*128 + BitPlane7*64);
-
 %run fast Fourier transform fft2 algorithm for computing the discrete Fourier transform.
 TestingFFT = fft2(double(EnhancedImage));
 %log fft values to visualize it more brighter.
@@ -48,13 +47,13 @@ TestingFFTShifted = log(1+abs(fftshift(TestingFFT)));
 %DC value represents amplitude at 0 Hz frequency. it's also equal to MN times average value of the image f(x,y) intensities.
 DC = TestingFFT(1,1);
 %get 5 highest frequency domain features or spectrum magnitudes
-TestingSignatureVector = abs(TestingFFT);
+TestingSignatureVector = abs(TestingFFT(:));
 TestingSignatureVector = sort(TestingSignatureVector,'descend');
 TestingSignatureVector = double(TestingSignatureVector(1:5));
 
 %calculate the euclidean distances for 5 features of the testing image and 5 features for all training images.
 for i = 1:length(TrainingSignatureVector)
-    EuclideanDistances(i) = sqrt((TrainingSignatureVector{i}(1) - TestingSignatureVector(1,1))^2 + (TrainingSignatureVector{i}(2) - TestingSignatureVector(1,2))^2 + (TrainingSignatureVector{i}(3) - TestingSignatureVector(1,3))^2 + (TrainingSignatureVector{i}(4) - TestingSignatureVector(1,4))^2 + (TrainingSignatureVector{i}(5) - TestingSignatureVector(1,5))^2);
+    EuclideanDistances(i) = sqrt((TrainingSignatureVector{i}(1) - TestingSignatureVector(1))^2 + (TrainingSignatureVector{i}(2) - TestingSignatureVector(2))^2 + (TrainingSignatureVector{i}(3) - TestingSignatureVector(3))^2 + (TrainingSignatureVector{i}(4) - TestingSignatureVector(4))^2 + (TrainingSignatureVector{i}(5) - TestingSignatureVector(5))^2);
 end
 
 EuclideanDistances = uint32(EuclideanDistances);
